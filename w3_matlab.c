@@ -2,7 +2,6 @@
 
 #define MAXSIZE 10
 
-
 void print (float matrix[MAXSIZE][MAXSIZE], int rows, int columns, char name){
     printf("Matrix %c (%d X %d):\n", name, rows, columns);
     
@@ -53,16 +52,43 @@ while (i<rowsA){
     }
 }
 
-  /* for (int i = 0; i < rowsA; i++) {
-      for (int j = 0; j < columnsB; j++) {
-         matrixC = 0;
-         for (int k = 0; k < columnsA; k++) {
+void printRecursive (float matrixA[MAXSIZE][MAXSIZE],
+int rowsA, int columnsA, int currentRow, int currentColumn){
+    
+    //Enter recursion by printing the current row and column
+    printf("enter printRecursive with current row=%d column=%d\n", currentRow, currentColumn);
+    
+    //If the recursion reaches the last character, print at which position that is
+    if (currentRow == rowsA){
+        printf("finished the recursion with current row=%d column=%d\n", currentRow, currentColumn);
+        return;
+    }
+    
+    //Increment columns before rows. Note that currentColumn++ causes an infinite loop here.
+    int nextRow = currentRow;
+    int nextColumn = currentColumn+1;
 
-        }
-      }
-   }
-}*/
-
+    //Once done imcrementing through columns, increment one row and repeat.
+    if (nextColumn == columnsA){
+        nextColumn = 0;
+        nextRow++;
+    }
+    //Function call (see explainer below)
+    printRecursive (matrixA, rowsA, columnsA, nextRow, nextColumn);
+    
+    /*Note that this will interrupt the following lines (90 & 91) until the function 
+    returns after the stop check is triggered a when the recursion should eventually stop.
+    
+    Then the compiler will return to line 79 on the "return-1"th fucntion where it will
+    execute line 90 & 91. When that is complete, it will return to the "return-2"th function
+    and will repeat this process until the first iteration of the function has executed fully.
+    
+    This is why the print exit statement prints in reverse, because the first function call
+    is the last to actually be executed by the compiler!*/
+    
+    printf("%8.2f\n", matrixA[currentRow][currentColumn]);
+    printf("exit printRecursive with current row=%d column=%d\n", currentRow, currentColumn);
+}
 
 
 int main(void){
@@ -202,6 +228,10 @@ int main(void){
                 mult (matrixA,rowsA,columnsA,matrixB,rowsB,columnsB,matrixC,rowsC,columnsC);
                 break;
             }
+            break;
+            
+            case 'p':
+            printRecursive(matrixA,rowsA,columnsA,0,0);
             break;
     
             default:
