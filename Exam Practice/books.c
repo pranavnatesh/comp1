@@ -12,7 +12,6 @@ typedef struct book {
     int pages;
 }books;
 
-
 void addBook(struct book books[], char *name, int pages){
     
     for (int i=0; i<MAXBOOKS; i++){
