@@ -90,7 +90,6 @@ int rowsA, int columnsA, int currentRow, int currentColumn){
     printf("exit printRecursive with current row=%d column=%d\n", currentRow, currentColumn);
 }
 
-
 int main(void){
     char cmd;
     
