@@ -12,7 +12,6 @@ int nrWords(char *dict[]){
     for (int i=0; i<MAXWORDS; i++){
         if (dict[i] != NULL) count++;
     }
-    
     return count;
 }
 
