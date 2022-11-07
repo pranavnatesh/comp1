@@ -10,11 +10,8 @@ float curr_im = 0;
 float new_re = 0;
 float new_im = 0;
 
-
 int n;
 int factor;
-
-
 
 while (cmd != 'q'){
 
