@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #define LENGTH 30
 
-
 char string1[12] = "hello";
 char string2[12] = "hello\n";
 char string3[12] = "hello\n\0you\n";
