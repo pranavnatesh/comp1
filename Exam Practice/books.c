@@ -129,7 +129,6 @@ void sortBooks(struct book books[]){
     }
 }
 
-
 int main(void){
 
     char cmd;
