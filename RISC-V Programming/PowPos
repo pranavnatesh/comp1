@@ -1,3 +1,5 @@
+; This program takes two user inputs (integers a & b) and computes a^b.
+
 .data
 str1:    .ascii "result = \0"
 str2:    .ascii "\n\0"
