@@ -8,6 +8,7 @@
 PATCH NOTES:
 Added struct declaration to make code more clear.
 Fixed print formatting to be correct.
+Added working sortOnPrice function.
 All the functions here work properly without leaks.
 */
 
@@ -101,6 +102,23 @@ void printDatabase(product_t *database, int dbSize){
     }
 }
 
+void sortOnPrice (product_t *database, int dbSize){
+    
+    product_t swap = {'\0'};
+    
+    for (int i=0; i<dbSize-1; i++){
+        for (int j=0; j<dbSize-i-1; j++){
+                if (database[j].product != NULL && database[j+1].product != NULL){
+                if (database[j].price > database[j+1].price){
+                    swap = database[j];
+                    database[j] = database[j+1];
+                    database[j+1] = swap;
+                }
+            }
+        }
+    }
+    
+}
 
 int main (void){
     char cmd;
@@ -149,6 +167,10 @@ int main (void){
             
             case 'p':
             printDatabase(database, dbSize);
+            break;
+            
+            case 's':
+            sortOnPrice(database, dbSize);
             break;
             
             default:
