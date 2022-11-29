@@ -4,4 +4,5 @@ Hi guys, I created this repository to revise for my C programming exam and to le
 
 If this was useful to you, please consider starring the repo!
 
-This Repo will no longer be updated with new exercises or fixes/additions to existing ones :(
+This Repo will no longer be updated with new exercises or fixes/additions to existing ones.
+
