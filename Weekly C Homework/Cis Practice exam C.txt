@@ -1,0 +1,186 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+
+#define MAXWORDS 10
+#define MAXLENGTH 30
+
+int nrWords(char *dict[]){
+    int tel=0;
+    for(int i=0;i<MAXWORDS;i++){
+        if(dict[i]!=NULL){
+            tel++;
+        }
+    }
+    return tel;
+}
+
+void addWord(char *dict[], char word[]){
+    char *temp=(char *)malloc((strlen(word)+1)*sizeof(char));
+    strcpy(temp,word);
+    for(int i=0;i<MAXWORDS;i++){
+        if(dict[i]==NULL){
+            dict[i]=temp;
+            return;
+        }
+    }
+    printf("The dictionary is full.\n");
+    free(temp);
+    return;
+}
+
+void printDict(char *dict[]){
+    if(dict[0]==NULL){
+        printf("The dictionary is empty.\n");
+        return;
+    }
+    printf("Dictionary:\n");
+    for(int i=0;i<MAXWORDS;i++){
+        if(dict[i]!=NULL){
+            printf("- %s\n",dict[i]);
+        }
+    }
+    return;
+}
+
+int findWord(char *dict[], char word[]){
+    int index = -1;
+    for(int i=0;i<MAXWORDS;i++){
+        if(dict[i]!=NULL){
+            if(strcmp(dict[i],word)==0){
+                index=i;
+                return index;
+            }
+        }
+    }
+    return index;
+}
+
+void removeWord(char *dict[], char word[]){
+    int plaats=findWord(dict,word);
+    if(plaats==-1){
+        printf("The word \"%s\" is not in the dictionary.\n",word);
+        return;
+    }
+    free(dict[plaats]);
+    for(int i=plaats;i<MAXWORDS-1;i++){
+        dict[i]=dict[i+1];
+    }
+    dict[MAXWORDS-1]=NULL;
+    return;
+}
+
+void swapWords(char *dict[], char word1[], char word2[]){
+    char *temp;
+    int plaats1 = findWord(dict,word1);
+    int plaats2 = findWord(dict,word2);
+    if(plaats1==-1 || plaats2==-1){
+        printf("Cannot swap words. At least one word is missing in the dictionary.\n");
+        return;
+    }
+    temp = dict[plaats1];
+    dict[plaats1] = dict[plaats2];
+    dict[plaats2] = temp;
+    return;
+}
+
+int longestWord(char *dict[], int from){
+    int amount = nrWords(dict);
+    if(from>=amount || dict[0]==NULL){
+        return -1;
+    }
+    
+    int maxLength = 0;
+    int maxIndex = 0;
+    for(int i=from;i<MAXWORDS;i++){
+        if(dict[i]!=NULL){
+            int length = strlen(dict[i]);
+            if(length>maxLength){
+                maxLength=length;
+                maxIndex=i;
+            }
+        }
+    }
+    return maxIndex;
+}
+
+void sortDict(char *dict[], int sortedUntil){
+    int amount=nrWords(dict);
+    int index2=sortedUntil;
+    int index=longestWord(dict,sortedUntil);
+    if(index2==amount){
+        return;
+    }
+    if(index!=index2){
+        swapWords(dict,dict[index2],dict[index]);
+        printf("swapped %i and %i\n",index,index2);
+    }
+    index2++;
+    sortDict(dict,index2);
+    // if(dict[0]!=NULL){
+}
+
+int main (void){
+    char cmd;
+    char *dict[MAXWORDS]={NULL};
+    char word[MAXLENGTH];
+    char word1[MAXLENGTH];
+    char word2[MAXLENGTH];
+    int index;
+    
+    while(cmd!='q'){
+        printf("Command [qnapfrslo]? ");
+        scanf(" %c",&cmd);
+        switch(cmd){
+            case 'o':
+                sortDict(dict,0);
+                break;
+            case 'l':
+                index=longestWord(dict,0);
+                if(index!=-1){
+                    printf("The longest word in the dictionary is \"%s\".\n",dict[index]);
+                }
+                break;
+            case 's':
+                printf("First word? ");
+                scanf(" %s",word1);
+                printf("Second word? ");
+                scanf(" %s",word2);
+                swapWords(dict,word1,word2);
+                break;
+            case 'r':
+                printf("Word? ");
+                scanf(" %s",word);
+                removeWord(dict,word);
+                break;
+            case 'f':
+                printf("Word? ");
+                scanf(" %s",word);
+                printf("The index of \"%s\" is %i.\n",word,findWord(dict,word));
+                break;
+            case 'p':
+                printDict(dict);
+                break;
+            case 'a':
+                printf("Word? ");
+                scanf(" %s",word);
+                addWord(dict,word);
+                break;
+            case 'n':
+                printf("The dictionary contains %i words\n",nrWords(dict));
+                break;
+            case 'q':
+                for(int i=0;i<MAXWORDS;i++){
+                    if(dict[i]!=NULL){
+                        free(dict[i]);
+                    }
+                }
+                printf("Bye!\n");
+                break;
+            default:
+                printf("Unknown command '%c'\n",cmd);
+                break;
+        }
+    }
+}

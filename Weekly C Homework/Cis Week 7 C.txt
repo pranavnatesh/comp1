@@ -1,0 +1,200 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+#include "predefined.h"
+
+void addWord(entry_t concordance[], char *word){
+    int len=strlen(word)+1;
+    char *temp = (char *)malloc(len*sizeof(char));
+    strcpy(temp,word);
+    for(int i=0;i<MAXWORDS;i++){
+        if(concordance[i].word==NULL){
+            concordance[i].word = temp;
+            return;
+        }else if(strcmp(concordance[i].word,word)>0){
+            for(int j=MAXWORDS-1;j>i;j--){
+                concordance[j] = concordance[j-1];
+            }
+            concordance[i].word = temp;
+            for(int k=0;k<MAXINDEX;k++){
+                concordance[i].indices[k]=-1;
+            }
+            return;
+        }else if(strcmp(concordance[i].word,temp)==0){
+            free(temp);
+            return;
+        }    
+    }
+}
+
+void printConcordance(entry_t concordance[]){
+    int index = 0;
+    if(concordance[index].word!=NULL){
+        printf("Concordance\n");
+        for(int i=0;i<MAXWORDS;i++){
+            if(concordance[i].word!=NULL){
+                printf("%10s:",concordance[i].word);
+                for(int j=0;j<MAXINDEX;j++){
+                    if(concordance[i].indices[j]!=-1){
+                        printf(" %i",concordance[i].indices[j]);
+                    }
+                }
+                printf("\n");
+            }
+        }
+    }else{
+        printf("The concordance is empty\n");
+    }
+}
+
+void addIndex(entry_t concordance[], char *word, int index){
+    for(int i=0;i<MAXWORDS;i++){
+        if(concordance[i].word!=NULL){
+            if(strcmp(concordance[i].word,word)==0){
+                for(int j=0;j<MAXINDEX;j++){
+                    if(concordance[i].indices[j]==-1){
+                        concordance[i].indices[j]=index;
+                        return;
+                    }
+                }
+                return;
+            }
+        }
+    }
+    printf("Word %s not found\n",word);
+}
+
+void readFile(entry_t concordance[], char *filename, int *index){
+    char hoi[100];
+    int test = 0;
+    FILE *fp = fopen(filename,"r");
+    if(fp==0){
+        printf("Cannot open file %s\n",filename);
+        return;
+    }
+    while(1){
+        fscanf(fp,"%s",hoi);
+        if(feof(fp)){
+            break;
+        }
+        addWord(concordance,hoi);
+        addIndex(concordance,hoi,*index);
+        *index = *index+1;
+        test=test+1;
+    }
+    printf("Inserted %d words\n",test);
+    fclose(fp);
+}
+
+void removeWord(entry_t concordance[], char *word){
+    for(int i=0;i<MAXWORDS;i++){
+        if(concordance[i].word!=NULL){
+            if(strcmp(concordance[i].word,word)==0){
+                free(concordance[i].word);
+                for(int j=i;j<MAXWORDS-1;j++){
+                    concordance[j] = concordance[j+1];
+                }
+                return;
+            }
+        }
+    }
+    printf("Word %s not found\n",word);
+}
+
+char *findWordAtIndex(entry_t concordance[], int index){
+    for(int i=0;i<MAXWORDS;i++){
+        for(int j=0;j<MAXINDEX;j++){
+            if(concordance[i].indices[j]==index){
+                printf("The word at index %i is %s\n",index,concordance[i].word);
+                return concordance[i].word;
+            }
+        }
+    }
+    printf("There is no word at index %i\n",index);
+    return NULL;
+}
+
+void printOriginalText(entry_t concordance[]){
+    int index=0;
+    while(1){
+        for(int i=0;i<MAXWORDS;i++){
+            for(int j=0;j<MAXINDEX;j++){
+                if(concordance[i].indices[j]==index){
+                    printf("%s ",concordance[i].word);
+                    index++;
+                    break;
+                }else{
+                    printf("? ");
+                    index++;
+                    break;
+                }
+            }
+        }
+    }
+}
+
+int main (void){
+    char cmd;
+    int index=0;
+    int index2=0;
+    int index3=0;
+    char word[100]="";
+    char boobies[100]="";
+    entry_t concordance[MAXWORDS]={NULL};
+    for(int i=0;i<MAXWORDS;i++){
+        concordance[i].word=NULL;
+        for(int j=0;j<MAXINDEX;j++){
+            concordance[i].indices[j] = -1;
+        }
+    }
+    
+    while(cmd!='q'){
+        printf("Command? ");
+        scanf(" %c",&cmd);
+        switch(cmd){
+            case 'o':
+                printOriginalText(concordance);
+                break;
+            case 'f':
+                printf("Index? ");
+                scanf(" %i",&index3);
+                findWordAtIndex(concordance,index3);
+                break;
+            case 'W':
+                printf("Word? ");
+                scanf(" %s",word);
+                removeWord(concordance,word);
+                break;
+            case 'r':
+                printf("File name? ");
+                scanf(" %s",boobies);
+                readFile(concordance,boobies,&index2);
+                break;
+            case 'i':
+                printf("Word index? ");
+                scanf(" %s %i",word,&index);
+                predefined_addIndex(concordance,word,index);
+                break;
+            case 'p':
+                printConcordance(concordance);
+                break;
+            case 'w':
+                printf("Word? ");
+                scanf(" %s",word);
+                predefined_addWord(concordance,word);
+                break;
+            case 'q':
+                for(int i=0;i<MAXWORDS;i++){
+                    if(concordance[i].word!=NULL){
+                        free(concordance[i].word);
+                    }
+                }
+                printf("Bye!\n");
+                break;
+            default:
+                printf("Unknown command '%c'\n",cmd);
+                break;
+        }
+    }
+}

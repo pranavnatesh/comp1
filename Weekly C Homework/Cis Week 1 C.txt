@@ -1,0 +1,99 @@
+#include <stdio.h>
+#include <math.h>
+#include <string.h>
+#include <stdlib.h>
+
+int main(void){
+    char cmd;
+    float curr_re = 0.0;
+    float curr_im = 0.0;
+    float new_re = 0.0;
+    float new_im = 0.0;
+    float fuckie_re = 0.0;
+    float fuckie_im = 0.0;
+    int power;
+    
+    printf("** Complex Calculator **\n");
+    while(cmd != 'q'){
+        printf("Operation [0+-*crpq]? ");
+        scanf(" %c",&cmd);
+        
+        switch (cmd){
+        case '+':
+            printf("Complex operand? ");
+            scanf("%f %f",&new_re,&new_im);
+            curr_re = curr_re + new_re;
+            curr_im = curr_im + new_im;
+            break;
+        case '-':
+            printf("Complex operand? ");
+            scanf("%f %f",&new_re,&new_im);
+            curr_re = curr_re - new_re;
+            curr_im = curr_im - new_im;
+            break;
+        case '0':
+            curr_re = 0.0;
+            curr_im = 0.0;
+            break;
+        case 'c':
+            curr_im = -curr_im;
+            break;
+        case '*':
+            printf("Complex operand? ");
+            scanf("%f %f",&new_re,&new_im);
+            fuckie_re = curr_re * new_re - curr_im * new_im;
+            curr_im = curr_re * new_im + curr_im * new_re;
+            curr_re = fuckie_re;
+            break;
+        case 'r':
+            printf("Natural operand? ");
+            scanf(" %i",&power);
+            new_re = 1.0;
+            new_im = 0.0;
+            for(int i=0;i<power;i++){
+                fuckie_re = curr_re * new_re - curr_im * new_im;
+                fuckie_im = curr_re * new_im + curr_im * new_re;
+                new_re = fuckie_re;
+                new_im = fuckie_im;
+            }
+            curr_re = new_re;
+            curr_im = new_im;
+            break;
+        case 'p':
+            for(int i=10;i>=-10;i--){
+                for(int r=-10;r<=10;r++){
+                    if(i<=curr_im && r<=curr_re && i+1>curr_im && r+1>curr_re){
+                        printf("*");
+                    }else if(i==0 && r == 0){
+                        printf("+");
+                    }else if (i == 0){
+                        printf("-");
+                    }else if(r == 0){
+                        printf("|");
+                    }else{
+                        printf(".");
+                    }
+                }
+                printf("\n");
+            }
+            break;
+        case 'q':
+            if(curr_im<0){
+                printf("Current value is %f%fi\n",curr_re,curr_im);
+            }else{
+                printf("Current value is %f+%fi\n",curr_re,curr_im);
+            }
+            printf("Bye!\n");
+            return(0);
+            break;
+        default:
+            printf("Invalid command '%c'\n",cmd);
+            break;
+        }
+        if(curr_im<0){
+            printf("Current value is %f%fi\n",curr_re,curr_im);
+        }else{
+            printf("Current value is %f+%fi\n",curr_re,curr_im);
+        }
+    }
+}

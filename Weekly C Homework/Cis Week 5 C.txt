@@ -1,0 +1,226 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct person{
+    char *name;
+    float height;
+}Person;
+
+Person *removeAllPersons(Person *persons, int nrPersons){
+    if(persons!=NULL){
+        for(int i=0;i<nrPersons;i++){
+            if(persons[i].name!=NULL){
+                free(persons[i].name);
+            }
+        }
+        free(persons);
+    }
+    return persons;
+}
+
+void printPersons(Person persons[], int nrPersons, int from,int to){
+    int temp=0;
+    printf("[");
+    if(persons!=NULL){
+        for(int j=0;j<nrPersons;j++){
+            if(persons[j].name!=NULL){
+                temp=j;
+            }
+        }
+        for(int i=0;i<nrPersons;i++){
+            if(persons[i].name!=NULL){
+                printf("(\"%s\",%.3f)",persons[i].name,persons[i].height);
+                if(i!=temp){
+                    printf(",");
+                }
+            }
+        }
+    }
+    printf("]\n");
+    return;
+}
+
+void insertPerson(struct person persons[], int nrPersons, int newEntry, char *newName, float newHeight){
+    char *temp = (char *)malloc(80*sizeof(char));
+    strcpy(temp,newName);
+    if(persons[newEntry].name==NULL){
+        persons[newEntry].name = temp;
+        persons[newEntry].height = newHeight;
+    }else{
+        printf("Entry %i is already occupied by (\"%s\",%.3f)\n",newEntry,persons[newEntry].name,persons[newEntry].height);
+        free(temp);
+    }
+}
+
+void maxHeight(struct person persons[], int nrPersons, float *max){
+    
+    for(int i=0;i<nrPersons;i++){
+        if(persons[i].height>*max){
+            *max = persons[i].height;
+        }
+    }
+    // printf("%.3f",*max);
+}
+
+float minHeight (struct person persons[], int nrPersons){
+    float min = 0.0;
+    if(persons!=NULL){
+        for(int j=0;j<nrPersons;j++){
+            if(persons[j].name!=NULL){
+                min = persons[j].height;
+            }    
+        }
+        for(int i=0;i<nrPersons;i++){
+            if(persons[i].name!=NULL){
+                if(persons[i].height<min){
+                    min = persons[i].height;
+                }
+            }
+        }
+    }
+    return min;
+}
+
+void replacePerson(struct person persons[], int nrPersons, int newEntry, char *newName, float newHeight){
+    if(persons[newEntry].name==NULL){
+        char *temp = (char *)malloc(80*sizeof(char));
+        strcpy(temp,newName);
+        if(persons[newEntry].name==NULL){
+            persons[newEntry].name = temp;
+            persons[newEntry].height = newHeight;
+        }
+    }else{
+        free(persons[newEntry].name);
+        char *temp = (char *)malloc(80*sizeof(char));
+        strcpy(temp,newName);
+        persons[newEntry].name = temp;
+        persons[newEntry].height = newHeight;
+    }
+}
+
+void bubbleSort(Person persons[], int nrPersons, int *swapped){
+    Person temp;
+    for(int i=0;i<nrPersons-1;i++){
+        for(int j=0;j<nrPersons-i-1;j++){
+            if(persons[j].height > persons[j+1].height){
+                temp = persons[j];
+                persons[j]=persons[j+1];
+                persons[j+1]=temp;
+                printf("after swapping: ");
+                printPersons(persons,nrPersons,0,nrPersons);
+                *swapped = *swapped +1;
+            }else if(persons[j].height == persons[j+1].height){
+                if(strcmp(persons[j].name,persons[j+1].name)>0){
+                    temp = persons[j];
+                    persons[j]=persons[j+1];
+                    persons[j+1]=temp;
+                    printf("after swapping: ");
+                    printPersons(persons,nrPersons,0,nrPersons);
+                    *swapped = *swapped +1;
+                }
+            }
+        }
+    }
+    printf("Swapped %i times\n",*swapped);
+}
+
+void mergeSort(Person persons[], int left, int right){
+    int q = (left+right)/2;
+    int n1 = q - left + 1;
+    int n2 = right - q;
+    
+    Person L[] = { NULL };
+    Person M[] = { NULL };
+
+}
+
+int main(void){
+    char cmd;
+    int nrPersons=0;
+    Person *persons = NULL;
+    int index;
+    char newName[80] = "";
+    float newHeight;
+    float max = 0.0;
+    int swapped = 0;
+    while(cmd!='q'){
+        printf("Command? ");
+        scanf(" %c", &cmd);
+        
+        switch(cmd){
+            case 'q':
+                removeAllPersons(persons,nrPersons);
+                printf("Bye!\n");
+                break;
+            case 'n':
+                removeAllPersons(persons,nrPersons);
+                printf("Entries? ");
+                scanf(" %d", &nrPersons);
+                if(nrPersons>0){
+                    persons = (Person*) malloc(nrPersons * sizeof(Person));
+                    for(int i=0;i<nrPersons;i++){
+                        persons[i].name = NULL;
+                        persons[i].height = 0.0;
+                    }
+                    if(persons == NULL){
+                        printf("malloc returned NULL");
+                        break;
+                    }
+                }else{
+                    persons = NULL;
+                }
+                break;
+            case 'p':
+                printPersons(persons,nrPersons,0,nrPersons);
+                break;
+            case 'i':
+                if(persons!=NULL){
+                    printf("Index? ");
+                    scanf(" %d", &index);
+                    printf("Name? ");
+                    scanf(" %s", newName);
+                    printf("Height? ");
+                    scanf(" %f", &newHeight);
+                    if(newHeight<=0){
+                        printf("Height must be larger than zero\n");
+                        break;
+                    }
+                    insertPerson(persons,nrPersons,index,newName,newHeight);
+                }
+                break;
+            case 'h':
+                maxHeight(persons,nrPersons,&max);
+                printf("Min: %.3f\n",minHeight(persons,nrPersons));
+                printf("Max: %.3f\n",max);
+                float range = max - minHeight(persons,nrPersons);
+                printf("Range: %.3f\n",range);
+                break;
+            case 'r':
+                if(persons!=NULL){
+                    printf("Index? ");
+                    scanf(" %d", &index);
+                    printf("Name? ");
+                    scanf(" %s", newName);
+                    printf("Height? ");
+                    scanf(" %f", &newHeight);
+                    if(newHeight<=0){
+                        printf("Height must be larger than zero\n");
+                        break;
+                    }
+                    replacePerson(persons,nrPersons,index,newName,newHeight);
+                }
+                break;
+            case 'b':
+            swapped=0;
+                bubbleSort(persons,nrPersons,&swapped);
+                break;
+            case 'm':
+                mergeSort(persons,0,nrPersons);
+                break;
+            default:
+                printf("Unknown command '%c'\n", cmd);
+                break;
+        }
+    }
+}

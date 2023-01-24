@@ -1,0 +1,242 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct {
+    char *grid;
+    int maxX;
+    int maxY;
+} navigation_t;
+
+typedef struct{
+    int x;
+    int y;
+} position_t;
+
+void newGrid(navigation_t *nav){
+    if(nav->grid!=NULL){
+        free(nav->grid);
+        nav->grid = (char *) malloc ((nav->maxX*nav->maxY)*sizeof(char));
+    }else{
+        nav->grid = (char *) malloc ((nav->maxX*nav->maxY)*sizeof(char));
+    }
+}
+
+void inputGrid(navigation_t nav){
+    int bleh = 0;
+    for(int i=0;i<nav.maxY;i++){
+        printf("Input row %i: ",i);
+        for(int j=0;j<nav.maxX;j++){
+            scanf(" %c",&nav.grid[i*nav.maxX+j]);
+            if(bleh==0){
+                if(nav.grid[i*nav.maxX+j]=='S'){
+                    bleh = 1;
+                }
+            }else{
+                if(nav.grid[i*nav.maxX+j]=='S'){
+                    printf("Extra starting point\n");
+                    nav.grid[i*nav.maxX+j]='#';
+                }
+            }
+        }
+    }
+}
+
+void printGrid(navigation_t nav){
+    for(int i=0;i<nav.maxY;i++){
+        for(int j=0;j<nav.maxX;j++){
+            printf("%c",nav.grid[i*nav.maxX+j]);
+        }
+        printf("\n");
+    }
+}
+
+position_t findStart(navigation_t nav){
+    position_t temp = { -1,-1 };
+    position_t temp2 = { -1,-1 };
+    for(int i=0;i<nav.maxY;i++){
+        for(int j=0;j<nav.maxX;j++){
+            if(nav.grid[i*nav.maxX+j]=='S'){
+                temp.x=j;
+                temp.y=i;
+            }
+            if(nav.grid[i*nav.maxX+j]=='D'){
+                temp2.x=j;
+                temp2.y=i;
+            }
+        }
+    }
+    if(temp.x == -1){
+        printf("Grid contains no starting point\n");
+    }
+    if(temp2.x == -1){
+        printf("Grid contains no destination\n");
+    }
+    return temp;
+}
+
+int findPath(navigation_t nav, int x, int y, int length){
+    int nlength;
+    int elength;
+    int slength;
+    int wlength;
+    if(x<0 || y<0 || x>nav.maxX-1 || y>nav.maxY-1){
+        return 0;
+    }
+    if(length>1 && nav.grid[y*nav.maxX+x]=='S'){
+        return 0;
+    }
+    if(nav.grid[y*nav.maxX+x]=='#' || nav.grid[y*nav.maxX+x]=='~' || nav.grid[y*nav.maxX+x]=='+'){
+        return 0;
+    }
+    if(nav.grid[y*nav.maxX+x]=='D'){
+        return length;
+    }
+    if(nav.grid[y*nav.maxX+x]!='S'){
+        nav.grid[y*nav.maxX+x]='+';
+    }
+    if((nlength=findPath(nav,x,y-1,length+1))){
+        return nlength;
+    }
+    if((elength=findPath(nav,x+1,y,length+1))){
+        return elength;
+    }
+    if((slength=findPath(nav,x,y+1,length+1))){
+        return slength;
+    }
+    if((wlength=findPath(nav,x-1,y,length+1))){
+        return wlength;
+    }
+    if(nav.grid[y*nav.maxX+x]!='S'){
+        nav.grid[y*nav.maxX+x]='~';
+    }
+    return 0;
+}
+
+void resetPath(navigation_t nav){
+    for(int i=0;i<nav.maxY;i++){
+        for(int j=0;j<nav.maxX;j++){
+            if(nav.grid[i*nav.maxX+j]=='~'){
+                nav.grid[i*nav.maxX+j]='.';
+            }
+            if(nav.grid[i*nav.maxX+j]=='+'){
+                nav.grid[i*nav.maxX+j]='.';
+            }
+        }
+    }
+}
+
+int longestPath(navigation_t nav, int x, int y, int length){
+    if(x<0 || y<0 || x>nav.maxX-1 || y>nav.maxY-1){
+        return 0;
+    }
+    if(nav.grid[y*nav.maxX+x]=='#' || nav.grid[y*nav.maxX+x]=='+'){
+        return 0;
+    }
+    if(nav.grid[y*nav.maxX+x]=='D'){
+        printf("Found a path of length %i\n",length);
+        return length;
+    }
+    
+    nav.grid[y*nav.maxX+x]='+';
+    
+    int nlength = length+1;
+    int elength = length+1;
+    int slength = length+1;
+    int wlength = length+1;
+    length=0;
+    nlength=longestPath(nav,x,y-1,nlength);
+    if(length<nlength){
+        length=nlength;
+    }
+    elength=longestPath(nav,x+1,y,elength);
+    if(length<elength){
+        length=elength;
+    }
+    slength=longestPath(nav,x,y+1,slength);
+    if(length<slength){
+        length=slength;
+    }
+    wlength=longestPath(nav,x-1,y,wlength);
+    if(length<wlength){
+        length=wlength;
+    }
+    nav.grid[y*nav.maxX+x]='.';
+    return length;
+}
+
+int main(void){
+    char cmd;
+    navigation_t nav = { NULL,0,0 };
+    position_t start = { 0,0 };
+    int length = 0;
+    
+    while(cmd!='q'){ 
+        printf("Command? ");
+        scanf(" %c", &cmd);
+        
+        switch(cmd){
+            case 'l':
+                length=0;
+                if(nav.grid!=NULL){
+                    start = findStart(nav);
+                    if(start.x!=-1){
+                        length=longestPath(nav,start.x,start.y,length);
+                        if(length!=0){
+                            printf("The length of the longest path is %i\n",length);
+                        }
+                    }
+                }
+                break;
+            case 'r':
+                resetPath(nav);
+                break;
+            case 'f':
+                length = 0;
+                if(nav.grid!=NULL){
+                    start = findStart(nav);
+                    if(start.x!=-1){
+                        length=findPath(nav,start.x,start.y,length);
+                        if(length==0){
+                            printf("No path found\n");
+                            printGrid(nav);
+                            break;
+                        }else{
+                            printf("Found a path of length %i\n",length);
+                            printGrid(nav);
+                        }
+                    }
+                }
+                break;
+            case 's':
+                start = findStart(nav);
+                if(start.x==-1){
+                    break;
+                }
+                printf("The start is at x=%i and y=%i\n",start.x,start.y);
+                break;
+            case 'p':
+                printGrid(nav);
+                break;
+            case 'i':
+                printf("Number of rows? ");
+                scanf(" %i",&nav.maxY);
+                printf("Number of columns? ");
+                scanf(" %i",&nav.maxX);
+                if(nav.maxY<2 || nav.maxX<2){
+                    printf("The number of rows and columns must be at least two\n");
+                    break;
+                }
+                newGrid(&nav);
+                inputGrid(nav);
+                break;
+            case 'q':
+                free(nav.grid);
+                printf("Bye!\n");
+                break;
+            default:
+                printf("Unknown command '%c'\n", cmd);
+                break;
+        }
+    }
+}

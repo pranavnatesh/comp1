@@ -1,0 +1,257 @@
+#include <stdio.h>
+#include <math.h>
+#include <string.h>
+#include <stdlib.h>
+#include <ctype.h>
+
+#define MAXSIZE 10
+
+void print(float matrix[MAXSIZE][MAXSIZE], int rows, int columns, char name){
+    printf("Matrix %c (%i X %i):\n",name,rows,columns);
+    for(int row=0;row<rows;row++){
+        for(int column=0;column<columns;column++){
+            printf("%8.2f",matrix[row][column]);
+            if(column==columns-1){
+                printf("\n");
+            }
+        }
+    }
+}
+
+void add(float matrixA[MAXSIZE][MAXSIZE], int rowsA, int columnsA, float matrixB[MAXSIZE][MAXSIZE], int rowsB, int columnsB, float matrixC[MAXSIZE][MAXSIZE], int rowsC, int columnsC){
+    if(rowsA!=rowsB){
+        printf("Dimensions of A & B do not match\n");
+        return;
+    }else if(columnsA!=columnsB){
+        printf("Dimensions of A & B do not match\n");
+        return;
+    }else{
+        for(int row=0;row<rowsA;row++){
+            for(int column=0;column<columnsA;column++){
+                matrixC[row][column] = matrixA[row][column]+matrixB[row][column];
+            }
+        }
+    }
+}
+
+void mult(float matrixA[MAXSIZE][MAXSIZE], int rowsA, int columnsA, float matrixB[MAXSIZE][MAXSIZE], int rowsB, int columnsB, float matrixC[MAXSIZE][MAXSIZE], int rowsC, int columnsC){
+    for(int i=0;i<rowsA;i++){
+        for(int j=0;j<columnsB;j++){
+            matrixC[i][j]=0.0;
+        }
+    }
+    for(int i=0;i<rowsA;i++){
+        for(int j=0;j<columnsB;j++){
+            for(int k=0;k<columnsA;k++){
+                matrixC[i][j]+=matrixA[i][k]*matrixB[k][j];
+            }
+        }
+    }
+}
+
+void printRecursive(float matrixA[MAXSIZE][MAXSIZE], int rowsA, int columnsA, int currentRow, int currentColumn){
+    int nextRow,nextColumn;
+    printf("enter printRecursive with current row=%d column=%d\n",currentRow,currentColumn);
+    if(currentRow > rowsA-1){
+        printf("finished the recursion with current row=%d column=%d\n",currentRow,currentColumn);
+        return;
+    }
+    if(currentColumn >= columnsA-1){
+        nextColumn = 0;
+        nextRow = currentRow+1;
+    }else{
+        nextRow = currentRow;
+        nextColumn = currentColumn+1;
+    }
+    printRecursive(matrixA,rowsA,columnsA,nextRow,nextColumn);
+    printf(" %7.2f\n",matrixA[currentRow][currentColumn]);
+    printf("exit printRecursive with current row=%d column=%d\n",currentRow,currentColumn);
+}
+
+void minorMatrix(float matrixA[MAXSIZE][MAXSIZE], int rowsA, int columnsA, int r, int c, float min[MAXSIZE][MAXSIZE]){
+    int i=0;
+    int j=0;
+    for(int row=0;row<rowsA;row++){
+        if(row!=r){
+            for(int column=0;column<columnsA;column++){
+                if(column!=c){
+                    min[i][j] = matrixA[row][column];
+                    j++;
+                }    
+            }
+            j=0;
+            i++;    
+        }
+    }
+}
+
+float determinant(float matrixA[MAXSIZE][MAXSIZE],int rowsA, int columnsA){
+    float det=0.0;
+    float temp[MAXSIZE][MAXSIZE];
+    if(rowsA==1 && columnsA==1){
+        det = matrixA[0][0];
+    }else if(rowsA==2 && columnsA==2){
+        det = matrixA[0][0]*matrixA[1][1]-matrixA[1][0]*matrixA[0][1];
+    }else{
+        for(int j=0;j<rowsA;j++){
+            int sign = (j % 2 ? -1 : +1);
+            minorMatrix(matrixA,rowsA,columnsA,0,j,temp);
+            det += sign * matrixA[0][j] * determinant(temp,rowsA-1,columnsA-1);
+        }
+    }
+    printf("%d",rowsA);
+    return det;
+}
+
+int main(void){
+    char cmd;
+    int rowsA = 1;
+    int temp_rows;
+    int temp_columns;
+    int columnsA = 1;
+    int rowsB = 1;
+    int columnsB = 1;
+    int rowsC = 1;
+    int columnsC = 1;
+    int r,c;
+    float matrixA[MAXSIZE][MAXSIZE] = {{ 0.0 }};
+    float matrixB[MAXSIZE][MAXSIZE] = {{ 0.0 }};
+    float matrixC[MAXSIZE][MAXSIZE] = {{ 0.0 }};
+    float matrixT[MAXSIZE][MAXSIZE] = {{ 0.0 }};
+    
+    while(cmd!='q'){
+        printf("Command? ");
+        scanf(" %c",&cmd);
+        
+        switch(cmd){
+            case 'a':
+                print(matrixA,rowsA,columnsA,'A');
+                break;
+            case 'b':
+                print(matrixB,rowsB,columnsB,'B');
+                break;
+            case 'c':
+                print(matrixC,rowsC,columnsC,'C');
+                break;
+            case 'A':
+                printf("Size of matrix A (rows columns)? ");
+                scanf(" %i %i",&temp_rows,&temp_columns);
+                if(temp_rows>10 || temp_rows<1){
+                    printf("Rows & columns must be between 1 and 10\n");
+                    break;
+                }else if(temp_columns>10 || temp_columns<1){
+                    printf("Rows & columns must be between 1 and 10\n");
+                    break;
+                }else{
+                    rowsA = temp_rows;
+                    columnsA = temp_columns;
+                    for(int row=0;row<rowsA;row++){
+                        printf("Row %d? ",row);
+                        for(int column=0;column<columnsA;column++){
+                            scanf(" %f",&matrixA[row][column]);
+                        }
+                    }
+                }
+                break;
+            case 'B':
+                rowsB = rowsA;
+                columnsB = columnsA;
+                for(int row=0;row<rowsA;row++){
+                    for(int column=0;column<columnsA;column++){
+                        matrixB[row][column]=matrixA[row][column];
+                    }
+                }
+                break;
+            case 'd':
+                if(rowsA!=columnsA){
+                    printf("Matrix A must be square\n");
+                }else{
+                    printf("\nThe determinant is %.6f\n",determinant(matrixA,rowsA,columnsA));
+                }
+                
+                break;
+            case 'm':
+                printf("Remove which row & column of matrix A? ");
+                scanf(" %d %d",&r,&c);
+                if(rowsA<2 || columnsA<2){
+                    printf("Matrix A must have at least two rows & columns\n");
+                    break;
+                }else if(r>rowsA || c>columnsA){
+                    printf("Rows & columns must be between 0 and %d & %d, respectively\n",rowsA-1,columnsA-1);
+                    break;
+                }else{
+                    rowsC = rowsA-1;
+                    columnsC = columnsA-1;
+                    minorMatrix(matrixA,rowsA,columnsA,r,c,matrixC);
+                }
+                break;
+            case 'p':
+                printRecursive(matrixA,rowsA,columnsA,0,0);
+                break;
+            case '*':
+                if(columnsA!=rowsB){
+                    printf("Dimensions of A & B do not match\n");
+                    break;
+                }
+                rowsC = rowsA;
+                columnsC = columnsB;
+                mult(matrixA,rowsA,columnsA,matrixB,rowsB,columnsB,matrixC,rowsC,columnsC);
+                break;
+            case 't':
+                temp_rows = columnsA;
+                temp_columns = rowsA;
+                for(int row=0;row<temp_rows;row++){
+                    for(int column=0;column<temp_columns;column++){
+                        matrixT[row][column]=matrixA[column][row];
+                    }
+                }
+                rowsA = temp_rows;
+                columnsA = temp_columns;
+                for(int row=0;row<temp_rows;row++){
+                    for(int column=0;column<temp_columns;column++){
+                        matrixA[row][column]=matrixT[row][column];
+                    }
+                }
+                break;
+            case '+':
+                if(rowsA==rowsB && columnsA==columnsB){
+                    rowsC=rowsA;
+                    columnsC=columnsA;
+                }
+                add(matrixA,rowsA,columnsA,matrixB,rowsB,columnsB,matrixC,rowsC,columnsC);
+                break;
+            case 'I':
+                printf("Size of matrix A (rows columns)? ");
+                scanf(" %i %i",&temp_rows,&temp_columns);
+                if(temp_rows>10 || temp_rows<1){
+                    printf("Rows & columns must be equal and between 1 and 10\n");
+                    break;
+                }else if(temp_columns>10 || temp_columns<1){
+                    printf("Rows & columns must be equal and between 1 and 10\n");
+                    break;
+                }else if(temp_rows!=temp_columns){
+                    printf("Rows & columns must be equal and between 1 and 10\n");
+                    break;
+                }else{
+                    rowsA = temp_rows;
+                    columnsA = temp_columns;
+                    for(int row=0;row<rowsA;row++){
+                        for(int column=0;column<columnsA;column++){
+                            if(row==column){
+                                matrixA[row][column]=1.0;
+                            }else{
+                                matrixA[row][column]=0.0;
+                            }
+                        }
+                    }
+                }
+                break;
+            case 'q':
+                printf("Bye!\n");
+                break;
+            default:
+                printf("Unknown command '%c'\n",cmd);
+                break;
+        }
+    }
+}

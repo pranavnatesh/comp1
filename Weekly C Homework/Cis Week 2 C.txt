@@ -1,0 +1,186 @@
+#include <stdio.h>
+#include <math.h>
+#include <string.h>
+#include <stdlib.h>
+
+#define LENGTH 30
+
+void printArray(char a[], int length){
+    putchar('[');
+    for(int i=0;i<length;i++){
+        if(i!=0){
+            printf(",");
+        }
+        if(a[i]=='\0'){
+            printf("\\0");
+        }else if(a[i]=='\n'){
+            printf("\\n");
+        }else{
+            putchar(a[i]);
+        }
+    }
+    putchar(']');
+    putchar('\n');
+}
+
+void printString(char str[]){
+    int i=0;
+    putchar('"');
+    while(str[i]!='\0'){
+        putchar(str[i]);
+        i++;
+    }
+    putchar('"');
+    putchar('\n');    
+}
+
+void readLine(char str[], int length){
+    int i=0;
+    while(1){
+        str[i] = getchar();
+        if(str[i]=='\n'){
+            str[i]='\0';
+            return;
+        }
+        if(i<length-1) i++;
+    }
+}
+
+int findFirstOccurrence(char str[], char aChar){
+    int i=0;
+    for(i=0;i<strlen(str);i++){
+        if(str[i]==aChar){
+            return i;
+        }
+    }
+    return -1;
+}
+
+int readInt(char str[], int length){
+    int sum = -1;
+    int i=0;
+    char c = str[0];
+    while(c>='0' && c<='9'){
+        if (sum==-1){
+            sum=0;
+        }
+        sum += c-48;
+        i++;
+        c=str[i];
+    }
+    return sum;
+}
+
+void insertChar(char str[], char aChar, int index){
+    int len = strlen(str);
+    
+    if(index > len){
+        return;
+    }
+    
+    for(int i=len;i>=0;i--){
+        if(i>=index){
+            str[i+1]=str[i];
+        }
+        if(i==index){
+            str[i]=aChar;
+        }
+    }
+}
+
+void replaceChars(char str[], char fromString[], char toChar){
+    int len = strlen(str);
+    int g=0;
+    int i=0;
+    while(g<strlen(fromString)){
+        for(i=0;i<len;i++){
+            if(str[i]==fromString[g]){
+                if(str[i]!=toChar){
+                    str[i]=toChar;
+                }
+            }
+        }
+        g++;
+        i=0;
+    }
+}
+
+void stringReorder(char str[], int index1, int index2){
+    int len = strlen(str);
+    char temp[LENGTH]={ '\0' };
+    
+    strncpy(&temp[0], &str[index2], len-index2);
+    strncpy(&temp[len-index2], &str[index1], index2-index1);
+    strncpy(&temp[len-index1], &str[0], index1);
+    strncpy(str, temp, strlen(temp));
+}
+
+int main(void){
+    char inputString[LENGTH]="";
+    char currString[LENGTH]="";
+    char fromString[LENGTH]="";
+    char aChar[LENGTH]="";
+    char toChar[LENGTH]="";
+    char characterString[LENGTH]="";
+    char indexString[LENGTH]="";
+    char index1[3]="";
+    char index2[3]="";
+    
+    while(inputString[0]!='q'){
+        printf("Command? ");
+        readLine(inputString,LENGTH);
+        
+        switch(inputString[0]){
+            case 'R':
+                printf("Please enter index 1? ");
+                readLine(index1,4);
+                
+                printf("Please enter index 2? ");
+                readLine(index2,4);
+                
+                stringReorder(currString,atoi(index1),atoi(index2));
+                break;
+            case 'r':
+                printf("Replace which characters? ");
+                readLine(fromString,LENGTH);
+                printf("with which character? ");
+                readLine(toChar,2);
+                replaceChars(currString,fromString,toChar[0]);
+                break;
+            case 'i':
+                printf("Insert which character? ");
+                readLine(characterString,2);
+                printf("At what index? ");
+                readLine(indexString,LENGTH);
+                if(strlen(currString)==LENGTH){
+                    break;
+                }
+                insertChar(currString,characterString[0],atoi(indexString));
+                break;
+            case 'o':
+                printf("Find first occurrence of which character? ");
+                readLine(aChar,LENGTH);
+                printf("The first occurrence of '%c' is at index %d\n",aChar[0],findFirstOccurrence(currString,aChar[0]));
+                break;
+            case 's':
+                printf("Please enter a string? ");
+                readLine(currString,LENGTH);
+                break;
+            case 'p':
+                printf("The current string is: ");
+                printString(currString);
+                break;
+            case 'a':
+                printf("The current array is: ");
+                printArray(currString,LENGTH);
+                break;
+            case 'q':
+                printf("Bye!\n");
+                return 0;
+                break;
+            default:
+                printf("Unknown command '%c'\n",inputString[0]);
+                break;
+        }
+    }
+}
