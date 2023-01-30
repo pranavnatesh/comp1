@@ -1,0 +1,241 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+
+#define MAXBOOKS 62
+#define MAXCATEGORIES 10
+#define MAXLENGTH 30
+
+struct book{
+    char *name;
+    char *categories[MAXCATEGORIES];
+    int pages;
+};
+
+void addBook(struct book books[], char *name, int pages){
+    char *temp=(char *)malloc((strlen(name)+1)*sizeof(char));
+    strcpy(temp,name);
+    for(int i=0;i<MAXBOOKS;i++){
+        if(books[i].name==NULL){
+            books[i].name=temp;
+            books[i].pages=pages;
+            return;
+        }
+    }
+    free(temp);
+    return;
+}
+
+void printBooks(struct book books[]){
+    printf("\n");
+    for(int i=0;i<MAXBOOKS;i++){
+        if(books[i].name!=NULL){
+            printf("Name: %s\n",books[i].name);
+            printf("Categories:");
+            for(int j=0;j<MAXCATEGORIES;j++){
+                if(books[i].categories[j]!=NULL){
+                    if(j==MAXCATEGORIES-1){
+                        if(books[i].categories[j]!=NULL){
+                            printf(" %s",books[i].categories[j]);
+                        }
+                    }else if(books[i].categories[j+1]!=NULL){
+                        printf(" %s,",books[i].categories[j]);
+                    }else{
+                        printf(" %s",books[i].categories[j]);
+                    }
+                }
+            }
+            printf("\n");
+            printf("Pages: %i\n\n",books[i].pages);
+        }
+    }
+}
+
+int findBookIndex(struct book books[], char *name){
+    for(int i=0;i<MAXBOOKS;i++){
+        if(books[i].name!=NULL){
+            if(strcmp(books[i].name,name)==0){
+                return i;
+            }
+        }
+    }
+    return -1;
+}
+
+void addCategory(struct book books[], char *name, char *category){
+    int index=findBookIndex(books,name);
+    if(index==-1){
+        return;
+    }
+    char *temp=(char *)malloc((strlen(category)+1)*sizeof(char));
+    strcpy(temp,category);
+    for(int k=0;k<MAXCATEGORIES;k++){
+        if(books[index].categories[k]==NULL){
+            books[index].categories[k]=temp;
+            return;
+        }
+    }
+    free(temp);
+    return;
+}
+
+void removeBook(struct book books[], char *name){
+    int index=findBookIndex(books,name);
+    if(index==-1){
+        return;
+    }
+    books[index].pages=0;
+    for(int k=0;k<MAXCATEGORIES;k++){
+        if(books[index].categories[k]!=NULL){
+            free(books[index].categories[k]);
+        }
+    }
+    free(books[index].name);
+    for(int i=index;i<MAXBOOKS;i++){
+        if(i==MAXBOOKS-1){
+            books[i].name=NULL;
+            books[i].pages=0;
+            for(int j=0;j<MAXCATEGORIES;j++){
+                books[i].categories[j]=NULL;
+            }
+        }else{
+            books[i]=books[i+1];
+        }
+    }
+    return;
+}
+
+void printNamesOfCategories(struct book books[], char *category){
+    for(int i=0;i<MAXBOOKS;i++){
+        for(int j=0;j<MAXCATEGORIES;j++){
+            if(books[i].categories[j]!=NULL){
+                if(strcmp(books[i].categories[j],category)==0){
+                    printf("%s\n",books[i].name);
+                }
+            }
+        }
+    }
+    return;
+}
+
+void swapBooks(struct book books[], int index1, int index2){
+    if(index1<0 || index2<0 || index1>MAXBOOKS-1 || index2>MAXBOOKS-1){
+        printf("Indices must be between 0 and 61.\n");
+        return;
+    }
+    if(books[index1].name==NULL || books[index2].name==NULL){
+        printf("At least one index is not in the library.\n");
+        return;
+    }
+    struct book temp=books[index1];
+    books[index1]=books[index2];
+    books[index2]=temp;
+    return;
+}
+
+void sortBooks(struct book books[]){
+    for(int i=0;i<MAXBOOKS-1;i++){
+        for(int j=0;j<MAXBOOKS-i-1;j++){
+            if(books[j].name!=NULL && books[j+1].name!=NULL){
+                if(strcmp(books[j].name,books[j+1].name)>0){
+                    swapBooks(books,j,j+1);
+                }
+            }
+        }
+    }
+    return;
+}
+
+int main(void){
+    char cmd;
+    char newName[MAXLENGTH];
+    char newCategory[MAXLENGTH];
+    int newPages;
+    int index;
+    int index2;
+    struct book books[MAXBOOKS]={NULL};
+    for(int i=0;i<MAXBOOKS;i++){
+        books[i].name=NULL;
+        books[i].pages=0;
+        for(int j=0;j<MAXCATEGORIES;j++){
+            books[i].categories[j]=NULL;
+        }
+    }
+    
+    while(cmd!='q'){
+        printf("Command? ");
+        scanf(" %c",&cmd);
+        switch(cmd){
+            case 'o':
+                sortBooks(books);
+                break;
+            case 's':
+                printf("Name? ");
+                scanf(" %29[^\n]",newName);
+                index=findBookIndex(books,newName);
+                printf("Name? ");
+                scanf(" %29[^\n]",newName);
+                index2=findBookIndex(books,newName);
+                swapBooks(books,index,index2);
+                break;
+            case 'k':
+                printf("Category? ");
+                scanf(" %29[^\n]",newCategory);
+                printNamesOfCategories(books,newCategory);
+                break;
+            case 'r':
+                printf("Name? ");
+                scanf(" %29[^\n]",newName);
+                removeBook(books,newName);
+                break;
+            case 'c':
+                printf("Name? ");
+                scanf(" %29[^\n]",newName);
+                printf("Category? ");
+                scanf(" %29[^\n]",newCategory);
+                addCategory(books,newName,newCategory);
+                break;
+            case 'f':
+                printf("Name? ");
+                scanf(" %29[^\n]",newName);
+                index=findBookIndex(books,newName);
+                if(index==-1){
+                    printf("Book %s is not in the library.\n",newName);
+                    break;
+                }
+                printf("Book %s has %i pages.\n",newName,books[index].pages);
+                break;
+            case 'p':
+                printBooks(books);
+                break;
+            case 'a':
+                printf("Name? ");
+                scanf(" %29[^\n]",newName);
+                printf("Number of pages? ");
+                scanf(" %i",&newPages);
+                if(newPages<0){
+                    printf("Pagina's moet positief zijn\n");
+                    break;
+                }
+                addBook(books,newName,newPages);
+                break;
+            case 'q':
+                printf("Bye!\n");
+                for(int i=0;i<MAXBOOKS;i++){
+                    if(books[i].name!=NULL){
+                        free(books[i].name);
+                        for(int j=0;j<MAXCATEGORIES;j++){
+                            if(books[i].categories[j]!=NULL){
+                                free(books[i].categories[j]);
+                            }
+                        }
+                    }
+                }
+                break;
+            default:
+                printf("Unknown command '%c'\n",cmd);
+                break;
+        }
+    }
+}
